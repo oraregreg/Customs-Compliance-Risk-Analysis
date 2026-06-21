@@ -91,7 +91,7 @@ The dataset contained several anomalies that required cleaning before analysis:
 ### Overview
 The broker performance analysis evaluated six customs brokers across three key metrics: slow clearance rate, demurrage costs, and a multi-metric comparison. This analysis helps identify which brokers are performing well and which require performance reviews or contract re-evaluation.
 
-[View the code in the notebook](https://github.com/oraregreg/Customs-Compliance-Risk-Analysis/blob/main/trade_compliance_analysis.ipynb#L45-L55)
+[View the code in the notebook](https://github.com/oraregreg/Customs-Compliance-Risk-Analysis/blob/main/Broker_and_Port_Analysis.ipynb)
 
 ```python
 # Code snippet for quick reference
@@ -187,7 +187,7 @@ broker_stats = df.groupby('broker').agg(
 
 ## Port Performance Analysis
 
-**Code**: [View in notebook →](https://github.com/oraregreg/Customs-Compliance-Risk-Analysis/blob/main/trade_compliance_analysis.ipynb#port-performance)
+**Code**: [View in notebook →](https://github.com/oraregreg/Customs-Compliance-Risk-Analysis/blob/main/Broker_and_Port_Analysis.ipynb)
 
 ```python
 port_stats = df.groupby('port_of_entry').agg(
@@ -215,7 +215,7 @@ Recommendation: Investigate delays at LAGOS and PORT ELIZABETH. Consider routing
 
 ## HS Code Risk Analysis
 
-**Code**: [View in notebook →](https://github.com/oraregreg/Customs-Compliance-Risk-Analysis/blob/main/trade_compliance_analysis.ipynb#hs-code-risk)
+**Code**: [View in notebook →](https://github.com/oraregreg/Customs-Compliance-Risk-Analysis/blob/main/HS_Code_Valuation_Analysis.ipynb)
 
 ```python
 hs_risk = df.groupby('hs_category').agg(
@@ -266,7 +266,7 @@ This analysis helps prioritize which HS categories need the most attention.
 
 ## Valuation Discrepancy Analysis
 
-**Code**: [View in notebook →](https://github.com/oraregreg/Customs-Compliance-Risk-Analysis/blob/main/trade_compliance_analysis.ipynb#valuation-discrepancy)
+**Code**: [View in notebook →](https://github.com/oraregreg/Customs-Compliance-Risk-Analysis/blob/main/HS_Code_Valuation_Analysis.ipynb)
 
 ```python
 disc_summary = df.groupby('broker').agg(
