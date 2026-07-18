@@ -1,5 +1,3 @@
-# Trade and Customs Compliance Risk Analysis Project
-
 ## Table of Contents
 
 1. [Overview](#1-overview)
