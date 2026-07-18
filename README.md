@@ -2,11 +2,11 @@
 
 ## Table of Contents
 
-1. [Overview](#overview)
-2. [Data Source](#data-source)
-3. [The Questions](#the-questions)
-4. [Tools Used](#tools-used)
-5. [Data Cleaning](#data-cleaning)
+1. [Overview](#1-overview)
+2. [Data Source](#2-data-source)
+3. [The Questions](#3-the-questions)
+4. [Tools Used](#4-tools-used)
+5. [Data Cleaning](#5-data-cleaning)
    - 5.1 [Handled Missing Values](#51-handled-missing-values)
    - 5.2 [Removed Duplicate Entries](#52-removed-duplicate-entries)
    - 5.3 [Standardized Text Fields](#53-standardized-text-fields)
@@ -15,7 +15,7 @@
    - 5.6 [Cleaned HS Codes](#56-cleaned-hs-codes)
    - 5.7 [Flagged Compliance Issues](#57-flagged-compliance-issues)
    - 5.8 [Engineered New Features](#58-engineered-new-features)
-6. [Analysis](#analysis)
+6. [Analysis](#6-analysis)
    - 6.1 [Broker Performance Analysis](#61-broker-performance-analysis)
      - 6.1.1 [Slow Clearance Rate](#611-slow-clearance-rate)
      - 6.1.2 [Financial Impact (Demurrage Costs)](#612-financial-impact-demurrage-costs)
@@ -26,6 +26,7 @@
    - 6.3 [HS Code Risk Analysis](#63-hs-code-risk-analysis)
    - 6.4 [Valuation Discrepancy Analysis](#64-valuation-discrepancy-analysis)
 
+   
 ## 1. Overview
 
 An analysis of customs clearance data for an Ecommerce company with operations in the Middle East & Africa (MEA) region. The project explored key risk indicators such as broker performance, port delays, classification accuracy, and valuation discrepancies. The project identified compliance risks, operational bottlenecks, and opportunities to improve clearance efficiency and reduce costs.
