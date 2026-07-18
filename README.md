@@ -1,17 +1,43 @@
 # Trade Compliance Risk Analysis Project – Customs Framework
 
-## Overview
+## Table of Contents
+
+1. [Overview](#overview)
+2. [Data Source](#data-source)
+3. [The Questions](#the-questions)
+4. [Tools Used](#tools-used)
+5. [Data Cleaning](#data-cleaning)
+   - 5.1 [Handled Missing Values](#51-handled-missing-values)
+   - 5.2 [Removed Duplicate Entries](#52-removed-duplicate-entries)
+   - 5.3 [Standardized Text Fields](#53-standardized-text-fields)
+   - 5.4 [Validated Dates](#54-validated-dates)
+   - 5.5 [Treated Outliers](#55-treated-outliers)
+   - 5.6 [Cleaned HS Codes](#56-cleaned-hs-codes)
+   - 5.7 [Flagged Compliance Issues](#57-flagged-compliance-issues)
+   - 5.8 [Engineered New Features](#58-engineered-new-features)
+6. [Analysis](#analysis)
+   - 6.1 [Broker Performance Analysis](#61-broker-performance-analysis)
+     - 6.1.1 [Slow Clearance Rate](#611-slow-clearance-rate)
+     - 6.1.2 [Financial Impact (Demurrage Costs)](#612-financial-impact-demurrage-costs)
+     - 6.1.3 [Multi-Metric Comparison](#613-multi-metric-comparison)
+     - 6.1.4 [Summary Table](#614-summary-table)
+     - 6.1.5 [Recommendations](#615-recommendations)
+   - 6.2 [Port Performance Analysis](#62-port-performance-analysis)
+   - 6.3 [HS Code Risk Analysis](#63-hs-code-risk-analysis)
+   - 6.4 [Valuation Discrepancy Analysis](#64-valuation-discrepancy-analysis)
+
+## 1. Overview
 
 An analysis of customs clearance data for an Ecommerce company with operations in the Middle East & Africa (MEA) region. The project explored key risk indicators such as broker performance, port delays, classification accuracy, and valuation discrepancies. The project identified compliance risks, operational bottlenecks, and opportunities to improve clearance efficiency and reduce costs.
 
-## Data Source: 
+## 2. Data Source: 
 
 Synthetic customs clearance dataset generated to simulate real-world trade data for an Ecommerce giant's export operations. The dataset replicates detailed information on shipments, HS classifications, customs brokers, ports of entry, clearance timelines, and duty payments.
 
 *Note: The dataset created was for demonstration and portfolio purposes. All entry numbers, shipment IDs, and values are fictional and do not represent real customs entries or commercial transactions.*
 
 
-## The Questions
+## 3. The Questions
 
 Core Risk Questions:
 1. Which brokers are consistently slow (clearance time > 48 hours), and what patterns exist in their delayed shipments?
@@ -22,7 +48,7 @@ Core Risk Questions:
 
 4. What valuation discrepancies exist between declared value and invoice value, and which brokers or suppliers are involved?
 
-## Tools Used
+## 4. Tools Used
 
 Python: Core analysis language
 
@@ -40,56 +66,53 @@ Visual Studio Code: Development environment
 
 Git & GitHub: Version control and project sharing
 
-## Data Cleaning
+## 5. Data Cleaning
 
 The dataset contained several anomalies that required cleaning before analysis:
 
-### Cleaning Steps Performed:
+### 5.1 Handled Missing Values
+- Dropped 105 rows with missing `release_date`
+- Filled missing `hs_code` and `country_origin` with 'UNKNOWN'
 
-1. **Handled Missing Values**
-   - Dropped 105 rows with missing `release_date`
-   - Filled missing `hs_code` and `country_origin` with 'UNKNOWN'
+### 5.2 Removed Duplicate Entries
+- Removed 5% duplicate shipment records (kept first occurrence)
 
-2. **Removed Duplicate Entries**
-   - Removed 5% duplicate shipment records (kept first occurrence)
+### 5.3 Standardized Text Fields
+- Converted all text fields to uppercase
+- Stripped leading/trailing spaces
+- Standardized inconsistent names (e.g., "dhl" → "DHL GLOBAL FORWARDING")
 
-3. **Standardized Text Fields**
-   - Converted all text fields to uppercase
-   - Stripped leading/trailing spaces
-   - Standardized inconsistent names (e.g., "dhl" → "DHL GLOBAL FORWARDING")
+### 5.4 Validated Dates
+- Converted all date columns to proper datetime format
+- Fixed 2% of records where `release_date` was before `entry_date`
 
-4. **Validated Dates**
-   - Converted all date columns to proper datetime format
-   - Fixed 2% of records where `release_date` was before `entry_date`
+### 5.5 Treated Outliers
+- Capped extreme `weight_kg` values at 95th percentile
+- Capped extreme `declared_value_usd` at 99th percentile
 
-5. **Treated Outliers**
-   - Capped extreme `weight_kg` values at 95th percentile
-   - Capped extreme `declared_value_usd` at 99th percentile
+### 5.6 Cleaned HS Codes
+- Removed invalid 'X' characters from codes
+- Flagged invalid HS codes (wrong length or non-numeric)
+- Extracted HS category (first 2 digits)
 
-6. **Cleaned HS Codes**
-   - Removed invalid 'X' characters from codes
-   - Flagged invalid HS codes (wrong length or non-numeric)
-   - Extracted HS category (first 2 digits)
+### 5.7 Flagged Compliance Issues
+- Identified shipments with missing licenses (`license_required` = 'Y' but `license_obtained` = 'N')
+- Flagged high-risk origins (China, India, Turkey, Vietnam, Thailand)
 
-7. **Flagged Compliance Issues**
-   - Identified shipments with missing licenses (`license_required` = 'Y' but `license_obtained` = 'N')
-   - Flagged high-risk origins (China, India, Turkey, Vietnam, Thailand)
+### 5.8 Engineered New Features
+- `clearance_hours`: Time between entry and release
+- `slow_clearance`: Flag for shipments taking >48 hours
+- `valuation_discrepancy_pct`: Difference between declared and invoice value
+- `high_discrepancy`: Flag for >20% discrepancy
+- `demurrage_cost`: Estimated cost of delays
 
-8. **Engineered New Features**
-   - `clearance_hours`: Time between entry and release
-   - `slow_clearance`: Flag for shipments taking >48 hours
-   - `valuation_discrepancy_pct`: Difference between declared and invoice value
-   - `high_discrepancy`: Flag for >20% discrepancy
-   - `demurrage_cost`: Estimated cost of delays
+## 6. Analysis
 
-## Analysis
+### 6.1 Broker Performance Analysis
 
-###  1. Which brokers are consistently slow (clearance time > 48 hours), and what patterns exist in their delayed shipments?
+**Question**: Which brokers are consistently slow (clearance time > 48 hours), and what patterns exist in their delayed shipments?
 
-## Broker Performance Analysis
-
-### Overview
-The broker performance analysis evaluated six customs brokers across three key metrics: slow clearance rate, demurrage costs, and a multi-metric comparison. This analysis helps identify which brokers are performing well and which require performance reviews or contract re-evaluation.
+**Overview**: The broker performance analysis evaluated six customs brokers across three key metrics: slow clearance rate, demurrage costs, and a multi-metric comparison. This analysis helps identify which brokers are performing well and which require performance reviews or contract re-evaluation.
 
 [View the code in the notebook](https://github.com/oraregreg/Customs-Compliance-Risk-Analysis/blob/main/Broker_and_Port_Analysis.ipynb)
 
@@ -104,7 +127,7 @@ broker_stats = df.groupby('broker').agg(
 
 ---
 
-### Slow Clearance Rate
+### 6.1.1 Slow Clearance Rate
 
 **Question**: Which brokers have the highest proportion of shipments taking more than 48 hours to clear?
 
@@ -123,7 +146,7 @@ broker_stats = df.groupby('broker').agg(
 
 ---
 
-### Financial Impact (Demurrage Costs)
+### 6.1.2 Financial Impact (Demurrage Costs)
 
 **Question**: Which brokers are costing the most in demurrage charges?
 
@@ -142,7 +165,7 @@ broker_stats = df.groupby('broker').agg(
 
 ---
 
-### Multi-Metric Comparison
+### 6.1.3 Multi-Metric Comparison
 
 **Question**: Which broker performs best across speed, cost, and efficiency?
 
@@ -161,7 +184,7 @@ broker_stats = df.groupby('broker').agg(
 
 ---
 
-### Summary Table
+### 6.1.4 Summary Table
 
 | **Metric** | **Best Performer** | **Worst Performer** |
 |------------|-------------------|---------------------|
@@ -171,7 +194,7 @@ broker_stats = df.groupby('broker').agg(
 
 ---
 
-### Recommendations
+### 6.1.5 Recommendations
 
 1. **Review DHL GLOBAL FORWARDING** – Highest demurrage cost despite moderate slow rate. Investigate root causes of extended clearance times.
 
@@ -183,9 +206,8 @@ broker_stats = df.groupby('broker').agg(
 
 5. **Monthly performance reviews** – Implement regular scorecard reviews to track broker performance trends over time.
 
-### 2. Which ports of entry present the highest risk of delays?
 
-## Port Performance Analysis
+## 6.2 Port Performance Analysis
 
 **Code**: [View in notebook →](https://github.com/oraregreg/Customs-Compliance-Risk-Analysis/blob/main/Broker_and_Port_Analysis.ipynb)
 
@@ -211,9 +233,8 @@ Key Insight: Most ports perform well, with average clearance times between 31–
 
 Recommendation: Investigate delays at LAGOS and PORT ELIZABETH. Consider routing more shipments through MOMBASA ICD or other well-performing ports where feasible. Monitor port performance monthly to track improvements.
 
-### 3. Which HS code categories have the highest duty rates and compliance risk?
 
-## HS Code Risk Analysis
+## 6.3 HS Code Risk Analysis
 
 **Code**: [View in notebook →](https://github.com/oraregreg/Customs-Compliance-Risk-Analysis/blob/main/HS_Code_Valuation_Analysis.ipynb)
 
@@ -262,9 +283,8 @@ The combined risk score normalizes three factors:
 
 This analysis helps prioritize which HS categories need the most attention. 
 
-### 4. What valuation discrepancies exist between declared value and invoice value?
 
-## Valuation Discrepancy Analysis
+## 6.4 Valuation Discrepancy Analysis
 
 **Code**: [View in notebook →](https://github.com/oraregreg/Customs-Compliance-Risk-Analysis/blob/main/HS_Code_Valuation_Analysis.ipynb)
 
