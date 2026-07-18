@@ -1,4 +1,4 @@
-# Trade Compliance Risk Analysis Project – Customs Framework
+# Trade and Customs Compliance Risk Analysis Project
 
 ## Table of Contents
 
