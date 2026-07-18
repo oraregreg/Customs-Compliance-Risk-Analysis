@@ -26,7 +26,7 @@
    - 6.3 [HS Code Risk Analysis](#63-hs-code-risk-analysis)
    - 6.4 [Valuation Discrepancy Analysis](#64-valuation-discrepancy-analysis)
 
-   
+
 ## 1. Overview
 
 An analysis of customs clearance data for an Ecommerce company with operations in the Middle East & Africa (MEA) region. The project explored key risk indicators such as broker performance, port delays, classification accuracy, and valuation discrepancies. The project identified compliance risks, operational bottlenecks, and opportunities to improve clearance efficiency and reduce costs.
