@@ -108,28 +108,67 @@ for i in range(n):
     
     # Generate dates
     entry_date = datetime.now() - timedelta(days=random.randint(1, 365))
+    is_weekend_entry = entry_date.weekday() >= 5
     
-    # Clearance time: normal is 2-48 hours, slow is 48-120 hours
-    if random.random() < 0.15:  # 15% slow clearance
+    # Values (generated before is_slow so declared-value scrutiny can factor in)
+    # NOTE: generated as float (not int) so the later "extreme discrepancy" flaw
+    # injection (which writes fractional values) doesn't hit a pandas dtype error.
+    declared_value_usd = round(random.uniform(500, 150000), 2)
+    
+    # License requirement (defined before is_slow so missing licenses can drive delay)
+    if hs_category == '30':
+        license_required = 'Y' if random.random() < 0.3 else 'N'
+    elif hs_category == '85':
+        license_required = 'Y' if random.random() < 0.1 else 'N'
+    else:
+        license_required = 'N'
+    license_obtained = 'Y' if (license_required == 'Y' and random.random() < 0.7) else 'N'
+    license_missing = (license_required == 'Y' and license_obtained == 'N')
+    
+    # ===== Causal probability model for slow_clearance =====
+    BROKER_SLOW_EFFECT = {
+        'AGILITY LOGISTICS': -0.05,
+        'KUEHNE NAGEL': -0.02,
+        'BOLLORE LOGISTICS': 0.00,
+        'PANALPINA': 0.02,
+        'EXPEDITORS INTERNATIONAL': 0.04,
+        'DHL GLOBAL FORWARDING': 0.06,
+    }
+    slow_prob = 0.08
+    slow_prob += BROKER_SLOW_EFFECT[broker_choice]
+    slow_prob += 0.15 if port in slow_ports else 0.0
+    slow_prob += 0.08 if origin in high_risk_origins else 0.0
+    slow_prob += 0.20 if license_missing else 0.0
+    slow_prob += 0.05 if is_weekend_entry else 0.0
+    slow_prob += 0.05 if declared_value_usd >= 135000 else 0.0  # top ~10% of the 500-150000 range
+    slow_prob = min(max(slow_prob, 0.02), 0.95)
+    
+    is_slow = random.random() < slow_prob
+    
+    if is_slow:
         clearance_hours = random.randint(48, 120)
-        is_slow = True
     else:
         clearance_hours = random.randint(2, 47)
-        is_slow = False
     
     accepted_date = entry_date + timedelta(hours=random.randint(1, 5))
     release_date = entry_date + timedelta(hours=clearance_hours)
     
-    # Values
-    declared_value_usd = random.randint(500, 150000)
-    # 20% of shipments have valuation discrepancy >20%
-    if random.random() < 0.2:
+    # ===== Causal probability model for valuation discrepancy =====
+    HIGH_RISK_SUPPLIERS = {'ChemCorp Industries', 'PlastiPack Ltd'}
+    disc_prob = 0.06
+    disc_prob += {'DHL GLOBAL FORWARDING': 0.05, 'EXPEDITORS INTERNATIONAL': 0.03,
+                  'AGILITY LOGISTICS': -0.03}.get(broker_choice, 0.0)
+    disc_prob += 0.10 if hs_category in ['85', '87', '73'] else 0.0
+    disc_prob += 0.07 if origin in high_risk_origins else 0.0
+    disc_prob += 0.08 if supplier in HIGH_RISK_SUPPLIERS else 0.0
+    disc_prob = min(max(disc_prob, 0.02), 0.95)
+    
+    if random.random() < disc_prob:
         invoice_value_usd = declared_value_usd * random.uniform(1.25, 1.5)
     else:
         invoice_value_usd = declared_value_usd * random.uniform(0.95, 1.05)
     
     invoice_value_usd = round(invoice_value_usd, 2)
-    declared_value_usd = round(declared_value_usd, 2)
     
     # Duty rate varies by HS code and origin
     if hs_category in ['30', '85']:
@@ -151,16 +190,6 @@ for i in range(n):
         broker_fee_usd = round(random.uniform(200, 450), 2)
     else:
         broker_fee_usd = round(random.uniform(100, 400), 2)
-    
-    # License requirement (10% of pharma, 5% electronics)
-    if hs_category == '30':
-        license_required = 'Y' if random.random() < 0.3 else 'N'
-    elif hs_category == '85':
-        license_required = 'Y' if random.random() < 0.1 else 'N'
-    else:
-        license_required = 'N'
-    
-    license_obtained = 'Y' if (license_required == 'Y' and random.random() < 0.7) else 'N'
     
     # FTA claimed
     fta_claimed = random.choice(fta_options)
@@ -267,4 +296,3 @@ df = df.reset_index(drop=True)
 # Save to CSV
 df.to_csv('customs_clearance_data.csv', index=False)
 print(f"Dataset generated with {len(df)} rows and {len(df.columns)} columns.")
-
