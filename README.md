@@ -23,6 +23,7 @@
    - 6.2 [Port Performance Analysis](#62-port-performance-analysis)
    - 6.3 [HS Code Risk Analysis](#63-hs-code-risk-analysis)
    - 6.4 [Valuation Discrepancy Analysis](#64-valuation-discrepancy-analysis)
+7. [From Descriptive to Predictive](#7-from-descriptive-to-predictive)
 
 
 ## 1. Overview
@@ -31,7 +32,7 @@ An analysis of customs clearance data for an Ecommerce company with operations i
 
 ## 2. Data Source: 
 
-Synthetic customs clearance dataset generated to simulate real-world trade data for an Ecommerce giant's export operations. The dataset replicates detailed information on shipments, HS classifications, customs brokers, ports of entry, clearance timelines, and duty payments.
+Synthetic customs clearance dataset generated to simulate real-world trade data for an Ecommerce giant's export operations. The dataset replicates detailed information on shipments, HS classifications, customs brokers, ports of entry, clearance timelines, and duty payments. Risk outcomes (clearance delays, valuation discrepancies) are generated from realistic underlying drivers — broker performance tier, port congestion, high-risk country of origin, missing import licenses, weekend entries, and high-value shipments — rather than assigned at random, so the relationships explored below reflect genuine (simulated) cause-and-effect rather than sampling noise.
 
 ***Note: The dataset created was for demonstration and portfolio purposes. All entry numbers, shipment IDs, and values are fictional and do not represent real customs entries or commercial transactions.***
 
@@ -132,16 +133,16 @@ broker_stats = df.groupby('broker').agg(
 
 ![Broker Slow Rate](images/broker_slow_rate.png)
 
-| **Broker** | **Slow Rate** | **Performance** |
-|------------|---------------|-----------------|
-| **AGILITY LOGISTICS** | 12% | ✅ Best |
-| **KUEHNE NAGEL** | 14% | ✅ Good |
-| **BOLLORE LOGISTICS** | 14% | ✅ Good |
-| **PANALPINA** | 15% | ⚠️ Average |
-| **DHL GLOBAL FORWARDING** | 15% | ⚠️ Average |
-| **EXPEDITORS INTERNATIONAL** | 15% | ⚠️ Average |
+| **Broker** | **Shipments** | **Slow Rate** | **Performance** |
+|------------|---------------|---------------|-----------------|
+| **AGILITY LOGISTICS** | 214 | 17% | ✅ Best |
+| **KUEHNE NAGEL** | 986 | 21% | ✅ Good |
+| **BOLLORE LOGISTICS** | 675 | 21% | ✅ Good |
+| **EXPEDITORS INTERNATIONAL** | 236 | 25% | ⚠️ Average |
+| **PANALPINA** | 230 | 27% | 🔴 Poor |
+| **DHL GLOBAL FORWARDING** | 2,449 | 29% | 🔴 Worst |
 
-**Key Insight:** AGILITY LOGISTICS has the lowest slow clearance rate (12%), making it the most efficient broker. The rest cluster around 14-15%, showing relatively consistent performance.
+**Key Insight:** AGILITY LOGISTICS has the lowest slow clearance rate (17%), making it the most efficient broker — consistent with a statistically significant relationship between broker and delay risk (χ² test, p < 0.001). DHL GLOBAL FORWARDING has both the highest volume and the highest slow rate, while PANALPINA — despite handling a much smaller volume — has the second-worst delay rate of any broker.
 
 ---
 
@@ -151,16 +152,16 @@ broker_stats = df.groupby('broker').agg(
 
 ![Broker Demurrage](images/broker_demurrage.png)
 
-| **Broker** | **Total Demurrage ($)** | **Impact** |
-|------------|-------------------------|------------|
-| **DHL GLOBAL FORWARDING** | 28,481 | 🔴 Highest |
-| **KUEHNE NAGEL** | 10,692 | 🟠 High |
-| **BOLLORE LOGISTICS** | 7,277 | 🟡 Medium |
-| **EXPEDITORS INTERNATIONAL** | 2,858 | 🟢 Low |
-| **AGILITY LOGISTICS** | 2,623 | 🟢 Lowest |
-| **PANALPINA** | 1,900 | 🟢 Lowest |
+| **Broker** | **Total Demurrage ($)** | **Avg per Shipment ($)** | **Impact** |
+|------------|--------------------------|----------------------------|------------|
+| **DHL GLOBAL FORWARDING** | 51,695.83 | 21.11 | 🔴 Highest |
+| **KUEHNE NAGEL** | 15,085.42 | 15.30 | 🟠 High |
+| **BOLLORE LOGISTICS** | 10,481.25 | 15.53 | 🟡 Medium |
+| **PANALPINA** | 5,552.08 | 24.14 | 🟡 Medium |
+| **EXPEDITORS INTERNATIONAL** | 4,591.67 | 19.46 | 🟢 Low |
+| **AGILITY LOGISTICS** | 3,208.33 | 14.99 | 🟢 Lowest |
 
-**Key Insight:** DHL GLOBAL FORWARDING accounts for nearly **50% of total demurrage costs** ($28,481 out of ~$53,831), despite not having the highest slow rate. This suggests they handle a larger volume of shipments with longer delay durations.
+**Key Insight:** DHL GLOBAL FORWARDING accounts for roughly **57% of total demurrage costs** ($51,696 of ~$90,615 total), driven by a combination of the highest shipment volume *and* the highest delay rate. Notably, PANALPINA has the highest average demurrage cost *per shipment* ($24.14) despite modest total volume — its shipments that do run late tend to run later than most.
 
 ---
 
@@ -172,14 +173,16 @@ broker_stats = df.groupby('broker').agg(
 
 | **Broker** | **Slow Clearance** | **Clearance Hours** | **Broker Fee** | **Overall** |
 |------------|-------------------|---------------------|----------------|-------------|
-| **AGILITY LOGISTICS** | 0.58 | 0.05 | 0.05 | **Best overall** |
-| **KUEHNE NAGEL** | 0.65 | 0.25 | 0.05 | Good |
-| **BOLLORE LOGISTICS** | 0.65 | 0.05 | 0.05 | Good |
-| **PANALPINA** | 0.95 | 0.05 | 0.05 | Mixed |
-| **DHL GLOBAL FORWARDING** | 0.95 | 0.65 | 0.05 | Poor |
-| **EXPEDITORS INTERNATIONAL** | 0.95 | 0.65 | 0.05 | Poor |
+| **AGILITY LOGISTICS** | 0.00 | 0.12 | 0.26 | **Best overall** |
+| **KUEHNE NAGEL** | 0.33 | 0.00 | 0.00 | Good |
+| **BOLLORE LOGISTICS** | 0.33 | 0.13 | 1.00 | Mixed (cheap fee, expensive broker fee) |
+| **EXPEDITORS INTERNATIONAL** | 0.67 | 0.41 | 0.28 | Mixed |
+| **DHL GLOBAL FORWARDING** | 1.00 | 0.75 | 0.00 | Poor on speed, but cheapest fee |
+| **PANALPINA** | 0.83 | 1.00 | 1.00 | **Worst overall** |
 
-**Key Insight:** AGILITY LOGISTICS performs best across all metrics. DHL GLOBAL FORWARDING and EXPEDITORS INTERNATIONAL show the worst performance in clearance hours and slow rate.
+*(0 = best, 1 = worst on that metric, normalized across the six brokers)*
+
+**Key Insight:** AGILITY LOGISTICS is the strongest all-round performer. PANALPINA is now the weakest across all three dimensions — slow, high broker fees, and the longest average clearance time — a meaningfully different conclusion than a broker that's merely "mixed."
 
 ---
 
@@ -187,21 +190,21 @@ broker_stats = df.groupby('broker').agg(
 
 | **Metric** | **Best Performer** | **Worst Performer** |
 |------------|-------------------|---------------------|
-| **Slow Clearance Rate** | AGILITY LOGISTICS (12%) | PANALPINA / DHL / EXPEDITORS (15%) |
-| **Demurrage Cost** | PANALPINA ($1,900) | DHL GLOBAL FORWARDING ($28,481) |
-| **Overall Performance** | AGILITY LOGISTICS | DHL GLOBAL FORWARDING |
+| **Slow Clearance Rate** | AGILITY LOGISTICS (17%) | DHL GLOBAL FORWARDING (29%) |
+| **Demurrage Cost (total)** | AGILITY LOGISTICS ($3,208) | DHL GLOBAL FORWARDING ($51,696) |
+| **Overall Performance** | AGILITY LOGISTICS | PANALPINA |
 
 ---
 
 ### 6.1.5 Recommendations
 
-1. **Review DHL GLOBAL FORWARDING** – Highest demurrage cost despite moderate slow rate. Investigate root causes of extended clearance times.
+1. **Review DHL GLOBAL FORWARDING** – Highest total demurrage cost *and* highest slow rate. Given the volume they carry, even a modest process improvement would meaningfully cut overall demurrage exposure.
 
-2. **Maintain relationship with AGILITY LOGISTICS** – Best overall performer across all metrics. Consider increasing their volume share.
+2. **Maintain and consider expanding the relationship with AGILITY LOGISTICS** – Best overall performer across every metric measured.
 
-3. **Investigate PANALPINA** – Low demurrage but higher slow rate. Understand why they have fewer delays once clearance starts.
+3. **Escalate a performance review with PANALPINA** – Worst broker on the combined scorecard: elevated slow rate, highest broker fee, and the longest average clearance time, despite relatively low shipment volume.
 
-4. **Consider volume weighting** – DHL may have higher costs simply due to handling more shipments. Normalize demurrage costs by shipment volume for fairer comparison.
+4. **Consider volume weighting when comparing brokers** – DHL's high totals partly reflect handling roughly 5x the volume of the next-largest broker; per-shipment metrics (like average demurrage) tell a complementary story.
 
 5. **Monthly performance reviews** – Implement regular scorecard reviews to track broker performance trends over time.
 
@@ -224,13 +227,28 @@ port_order = port_stats.sort_values('avg_clearance_hrs', ascending=True).index.t
 
 Average clearance time by port of entry – ordered from fastest to slowest.
 
-![Boxplot for port performance](images/Boxplot_Port_Performance.png)
+![Boxplot for port performance](images/port_boxplot_ordered.png)
 
 Clearance time distribution by port – ordered from best (fastest) to worst (slowest). The red dashed line shows the 48-hour threshold.
 
-Key Insight: Most ports perform well, with average clearance times between 31–35 hours. However, LAGOS and PORT ELIZABETH show the highest averages and significant variability, with some shipments exceeding 48 hours. MOMBASA ICD is the best-performing port with the lowest average clearance time.
+| **Port** | **Shipments** | **Avg Clearance (hrs)** | **Slow Rate** |
+|---|---|---|---|
+| ABIDJAN | 223 | 31.1 | 14% |
+| PORT ELIZABETH | 243 | 31.4 | 16% |
+| CAPE TOWN | 240 | 32.9 | 16% |
+| DAR ES SALAAM | 236 | 33.1 | 19% |
+| TEMA | 267 | 34.3 | 18% |
+| NAIROBI | 204 | 35.1 | 19% |
+| DURBAN | 269 | 36.1 | 20% |
+| MOMBASA ICD | 246 | 37.3 | 18% |
+| CASABLANCA | 734 | 41.4 | 30% |
+| MOMBASA | 699 | 41.4 | 29% |
+| LAGOS | 713 | 41.7 | 30% |
+| ALEXANDRIA | 716 | 43.3 | 32% |
 
-Recommendation: Investigate delays at LAGOS and PORT ELIZABETH. Consider routing more shipments through MOMBASA ICD or other well-performing ports where feasible. Monitor port performance monthly to track improvements.
+**Key Insight:** There is a clear, statistically significant split (χ² test, p < 0.001) between two tiers of ports. MOMBASA, CASABLANCA, LAGOS, and ALEXANDRIA — the four ports with historically known congestion issues — average 41–43 hours with 29–32% of shipments running slow. Every other port averages 31–37 hours with 14–20% running slow. ALEXANDRIA is the single worst-performing port; ABIDJAN is the best.
+
+**Recommendation:** Prioritize operational review of MOMBASA, CASABLANCA, LAGOS, and ALEXANDRIA — the gap between these four ports and the rest of the network is large and consistent, not marginal. Where shipment routing is flexible, consider shifting volume toward ABIDJAN, PORT ELIZABETH, or CAPE TOWN. Monitor port performance monthly to track whether the gap narrows.
 
 
 ## 6.3 HS Code Risk Analysis
@@ -247,40 +265,35 @@ hs_risk = df.groupby('hs_category').agg(
 ```
 ![Image showing HS Risk Analysis](images/hs_risk_score.png)
 
----
+| **HS Category** | **Shipments** | **Avg Duty ($)** | **License Req. %** | **Slow Rate** | **Combined Risk Score** |
+|---|---|---|---|---|---|
+| 73 – Steel/Metal | 454 | 15,647 | 0% | 26% | 0.65 |
+| 87 – Automotive | 453 | 15,065 | 0% | 27% | 0.65 |
+| 30 – Pharmaceuticals | 447 | 7,533 | 28% | 26% | 0.55 |
+| 85 – Electronics | 425 | 7,511 | 10% | 27% | 0.38 |
+| 39 – Plastics | 485 | 5,752 | 0% | 28% | 0.22 |
+| 40 – Rubber/Tyres | 456 | 5,428 | 0% | 27% | 0.18 |
+| 84 – Machinery | 457 | 5,613 | 0% | 25% | 0.13 |
+| 94 – Furniture | 463 | 5,480 | 0% | 25% | 0.13 |
+| 62 – Textiles | 435 | 5,584 | 0% | 23% | 0.08 |
+| 70 – Glass | 474 | 5,410 | 0% | 20% | 0.00 |
 
-The combined risk score normalizes three factors:
+The combined risk score normalizes and weights three factors (Duty Cost 50%, License Required 30%, Slow Clearance 20%) across the 10 HS categories.
 
-| **Factor** | **Weight** | **Why** |
-|------------|------------|---------|
-| **Duty Cost** | 50% | Financial impact is most important |
-| **License Required** | 30% | Compliance risk can cause delays and penalties |
-| **Slow Clearance** | 20% | Operational risk affects customer experience |
+**Example – HS 30 (Pharma):** Moderate duty, but the *only* category with meaningful license risk (28% of shipments require one) → combined risk 0.55, driven primarily by compliance exposure rather than cost.
 
-**Example – HS 30 (Pharma):**
-- Duty cost: Moderate (7,803)
-- License required: High (30%) → Compliance risk
-- Slow rate: Moderate (14%)
-- Combined risk: 0.72 → **High priority**
+**Example – HS 73 (Steel) / HS 87 (Automotive):** No license requirement, but by far the highest duty burden of any category → combined risk 0.65 each, driven primarily by financial exposure.
 
-**Example – HS 87 (Automotive):**
-- Duty cost: High (15,199) → Financial risk
-- License required: Low (0%)
-- Slow rate: High (17%) → Operational risk
-- Combined risk: 0.70 → **High priority**
-
----
-
-## Summary
+**Summary**
 
 | **Category** | **Why It's Risky** | **What to Do** |
 |--------------|-------------------|----------------|
-| **HS 30 (Pharma)** | License compliance | Pre-validate licenses |
-| **HS 87 (Automotive)** | High duty costs | Optimize tariffs |
-| **HS 73 (Steel)** | High duty costs | Review duty drawback |
-| **HS 85 (Electronics)** | Mixed risk | Manual verification |
+| **HS 73 (Steel)** | Highest duty cost | Review duty drawback / classification accuracy |
+| **HS 87 (Automotive)** | Near-highest duty cost | Optimize tariff engineering |
+| **HS 30 (Pharma)** | License compliance (28% of shipments) | Pre-validate licenses before shipment |
+| **HS 85 (Electronics)** | Mixed: moderate duty + license risk | Manual verification |
 
-This analysis helps prioritize which HS categories need the most attention. 
+This analysis helps prioritize which HS categories need the most attention.
 
 
 ## 6.4 Valuation Discrepancy Analysis
@@ -297,12 +310,24 @@ disc_summary = df.groupby('broker').agg(
 
 ![Image showing the valuation discrepancy per broker](images/valuation_discrepancy_horizontal.png)
 
-Key Insight: All brokers show high discrepancy rates between 22-25%, indicating a systemic valuation issue across the entire broker network. This suggests the problem may lie in the company's valuation practices rather than individual broker performance.
+| **Broker** | **Shipments** | **High-Discrepancy Rate** | **Avg Discrepancy %** |
+|---|---|---|---|
+| EXPEDITORS INTERNATIONAL | 236 | 22% | 10.5% |
+| DHL GLOBAL FORWARDING | 2,449 | 20% | 8.9% |
+| BOLLORE LOGISTICS | 675 | 17% | 8.0% |
+| AGILITY LOGISTICS | 214 | 17% | 9.3% |
+| KUEHNE NAGEL | 986 | 15% | 7.3% |
+| PANALPINA | 230 | 15% | 6.8% |
 
-Recommendations:
+**Key Insight:** Unlike broker slow rates, valuation discrepancy rates vary less dramatically by broker — but the difference is real and statistically significant (χ² test, p ≈ 0.003), not the flat, uniform pattern seen previously. EXPEDITORS INTERNATIONAL and DHL GLOBAL FORWARDING show meaningfully elevated discrepancy risk; PANALPINA and KUEHNE NAGEL are comparatively lower-risk. HS category also matters: Electronics, Automotive, and Steel shipments (categories 85/87/73) carry materially higher discrepancy risk than other product categories, consistent with these being common targets for duty-avoidance under-declaration in real customs environments.
 
-Review internal valuation policies – The consistent discrepancy across all brokers suggests a systemic issue.
+**Recommendations:**
 
-Implement automated alerts for shipments with >20% discrepancy.
+- **Prioritize broker-level review for EXPEDITORS INTERNATIONAL and DHL GLOBAL FORWARDING** – their discrepancy rates are the highest and not attributable to chance.
+- **Apply extra scrutiny to Electronics, Automotive, and Steel shipments (HS 85/87/73)** regardless of broker, given their consistently elevated discrepancy risk.
+- **Implement automated alerts for shipments with >20% discrepancy**, especially where both a higher-risk broker and higher-risk HS category coincide.
 
-Standardize valuation practices across all brokers.
+
+## 7. From Descriptive to Predictive
+
+This project originally answered *what happened* — which brokers, ports, and product categories carried the most risk historically. The next phase of this project builds on the same dataset to answer *what's likely to happen* — a predictive risk-scoring model that flags high-risk shipments (delay risk and valuation risk) before they clear customs, using the broker, port, origin, and license-status relationships surfaced in Sections 6.1–6.4 above as engineered features. See `PREDICTIVE_MODELING.md` (or the predictive notebook, once added) for that work.
