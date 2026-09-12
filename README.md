@@ -131,7 +131,7 @@ broker_stats = df.groupby('broker').agg(
 
 **Question**: Which brokers have the highest proportion of shipments taking more than 48 hours to clear?
 
-![Broker Slow Rate](images/broker_slow_rate.png)
+![Broker Slow Rate](img/broker_slow_rate.png)
 
 | **Broker** | **Shipments** | **Slow Rate** | **Performance** |
 |------------|---------------|---------------|-----------------|
@@ -150,7 +150,7 @@ broker_stats = df.groupby('broker').agg(
 
 **Question**: Which brokers are costing the most in demurrage charges?
 
-![Broker Demurrage](images/broker_demurrage.png)
+![Broker Demurrage](img/broker_demurrage.png)
 
 | **Broker** | **Total Demurrage ($)** | **Avg per Shipment ($)** | **Impact** |
 |------------|--------------------------|----------------------------|------------|
@@ -169,7 +169,7 @@ broker_stats = df.groupby('broker').agg(
 
 **Question**: Which broker performs best across speed, cost, and efficiency?
 
-![Broker Comparison](images/broker_comparison.png)
+![Broker Comparison](img/broker_comparison.png)
 
 | **Broker** | **Slow Clearance** | **Clearance Hours** | **Broker Fee** | **Overall** |
 |------------|-------------------|---------------------|----------------|-------------|
@@ -223,11 +223,11 @@ port_stats = df.groupby('port_of_entry').agg(
 # Order ports from best to worst
 port_order = port_stats.sort_values('avg_clearance_hrs', ascending=True).index.tolist()
 ```
-![Port Clearance time image](images/port_clearance_time.png)
+![Port Clearance time image](img/port_clearance_time.png)
 
 Average clearance time by port of entry – ordered from fastest to slowest.
 
-![Boxplot for port performance](images/port_boxplot_ordered.png)
+![Boxplot for port performance](img/port_boxplot_ordered.png)
 
 Clearance time distribution by port – ordered from best (fastest) to worst (slowest). The red dashed line shows the 48-hour threshold.
 
@@ -263,7 +263,7 @@ hs_risk = df.groupby('hs_category').agg(
     slow_clearance_pct=('slow_clearance', 'mean')
 ).round(2).sort_values('avg_duty_usd', ascending=False)
 ```
-![Image showing HS Risk Analysis](images/hs_risk_score.png)
+![Image showing HS Risk Analysis](img/hs_risk_score.png)
 
 | **HS Category** | **Shipments** | **Avg Duty ($)** | **License Req. %** | **Slow Rate** | **Combined Risk Score** |
 |---|---|---|---|---|---|
@@ -308,7 +308,7 @@ disc_summary = df.groupby('broker').agg(
 ).round(2).sort_values('high_disc_pct', ascending=False)
 ```
 
-![Image showing the valuation discrepancy per broker](images/valuation_discrepancy_horizontal.png)
+![Image showing the valuation discrepancy per broker](img/valuation_discrepancy_horizontal.png)
 
 | **Broker** | **Shipments** | **High-Discrepancy Rate** | **Avg Discrepancy %** |
 |---|---|---|---|
