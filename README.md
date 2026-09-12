@@ -333,3 +333,4 @@ disc_summary = df.groupby('broker').agg(
 This project originally answered *what happened* — which brokers, ports, and product categories carried the most risk historically. The next phase of this project builds on the same dataset to answer *what's likely to happen* — a predictive risk-scoring model that flags high-risk shipments (delay risk and valuation risk) before they clear customs, using the broker, port, origin, and license-status relationships surfaced in Sections 6.1–6.4 above as engineered features. See `PREDICTIVE_MODELING.md` (or the predictive notebook, once added) for that work.
 
 <!-- cache bust -->
+<!-- cache bust 2026-09-13T00:20:34.6731081+03:00 -->
