@@ -331,3 +331,5 @@ disc_summary = df.groupby('broker').agg(
 ## 7. From Descriptive to Predictive
 
 This project originally answered *what happened* — which brokers, ports, and product categories carried the most risk historically. The next phase of this project builds on the same dataset to answer *what's likely to happen* — a predictive risk-scoring model that flags high-risk shipments (delay risk and valuation risk) before they clear customs, using the broker, port, origin, and license-status relationships surfaced in Sections 6.1–6.4 above as engineered features. See `PREDICTIVE_MODELING.md` (or the predictive notebook, once added) for that work.
+
+<!-- cache bust -->
